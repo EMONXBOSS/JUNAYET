@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ERROR Video Downloader</title>
+<style>
+:root{--bg:#07041a;--panel:#0d0824;--line:#3a1f8a;--p:#7c3aed;--p2:#a855f7;--t:#ece6ff;--m:#9d93c9;--ok:#34d399;--err:#f87171}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:radial-gradient(1200px 600px at 70% -10%,#2a1260 0,transparent 60%),var(--bg);color:var(--t);font:14px/1.4 "Segoe UI",system-ui,sans-serif;overflow-x:hidden}
+#fx{position:fixed;inset:0;z-index:0;pointer-events:none}
+.app{position:relative;z-index:1;display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer;border:0}
+/* sidebar */
+aside{background:linear-gradient(#0a0620,#05030f);border-right:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column;gap:6px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;margin-bottom:18px}
+.logo{width:34px;height:34px;border-radius:50%;background:conic-gradient(from 0deg,var(--p),#22d3ee,var(--p2),var(--p));display:grid;place-items:center;animation:spin 6s linear infinite}
+.logo i{width:28px;height:28px;border-radius:50%;background:#12082e center/cover url(img/avatar.png);display:block;animation:spin 6s linear infinite reverse}
+.nav{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;background:none;text-align:left;color:var(--m);transition:.25s}
+.nav:hover{background:#1a0f42;color:#fff;transform:translateX(4px)}
+.nav.on{background:linear-gradient(90deg,var(--p),#6d28d9);color:#fff;box-shadow:0 0 22px #7c3aed88}
+.side-art{margin-top:auto;height:260px;border-radius:12px;background:linear-gradient(#0000,#12082e) , center/cover url(img/side.png);display:flex;align-items:flex-end;padding:12px;font-weight:800;letter-spacing:3px;color:var(--p2);text-shadow:0 0 14px var(--p)}
+/* main */
+main{padding:0 16px 20px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.banner{position:relative;margin-top:10px;border:1px solid var(--line);border-radius:12px;min-height:180px;overflow:hidden;display:flex;align-items:center;gap:26px;padding:16px 22px;background:linear-gradient(100deg,#140a36,#0a0520 60%),center/cover url(img/banner.png)}
+.banner::before{content:"";position:absolute;inset:-50%;background:conic-gradient(from 0deg,transparent 0 70%,#7c3aed55 80%,transparent 90%);animation:spin 9s linear infinite}
+.banner>*{position:relative}
+.avatar{width:136px;height:136px;border-radius:50%;padding:4px;background:conic-gradient(var(--p),#22d3ee,var(--p2),var(--p));animation:spin 5s linear infinite;flex:none}
+.avatar i{display:block;width:100%;height:100%;border-radius:50%;background:#12082e center/cover url(img/avatar.png);animation:spin 5s linear infinite reverse}
+.title b{display:block;font-size:64px;line-height:1;font-weight:900;font-style:italic;background:linear-gradient(#fff,#a78bfa 60%,#7c3aed);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 16px #7c3aed);animation:flick 4s infinite}
+.title span{letter-spacing:12px;color:var(--p2);font-weight:700;font-size:20px;padding-left:6px}
+.tag{margin-left:auto;text-align:right}
+.tag h2{font-size:22px;font-weight:600;color:#c4b5fd}
+.tag p{color:var(--m)}
+.tag small{display:block;margin-top:14px;letter-spacing:4px;color:#d8ccff}
+.quote{max-width:200px;font-size:15px;border-left:2px solid var(--p);padding-left:12px;color:#ddd3ff}
+/* cards */
+.card{background:linear-gradient(#0f0828cc,#09051acc);border:1px solid var(--line);border-radius:12px;padding:14px;animation:up .6s both;backdrop-filter:blur(4px)}
+.grid{display:grid;grid-template-columns:1fr 330px;gap:16px}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.input-row{display:flex;gap:12px}
+.input{flex:1;display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;background:#150c3a;padding:0 14px;transition:.3s}
+.input:focus-within{border-color:var(--p2);box-shadow:0 0 0 3px #7c3aed44,0 0 24px #7c3aed55}
+.input input{flex:1;background:none;border:0;outline:0;color:#fff;height:46px;font-size:15px}
+.btn{height:46px;padding:0 20px;border-radius:8px;background:#1a0f42;border:1px solid var(--line);transition:.25s;display:inline-flex;align-items:center;gap:8px;position:relative;overflow:hidden}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px #7c3aed66;border-color:var(--p2)}
+.btn.pri{background:linear-gradient(90deg,#8b5cf6,#6d28d9);border-color:#a78bfa}
+.btn.pri::after,.dl::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,#fff5,transparent);transform:skewX(-20deg);animation:shine 3.2s infinite}
+.sup{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:14px;color:var(--m)}
+.chip{display:flex;align-items:center;gap:6px;color:#d8ccff;font-size:12px}
+.ic{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:7px;font-weight:800;font-size:13px;color:#fff;flex:none}
+.yt{background:#ef1d1d}.fb{background:#1877f2}.tt{background:#111;border:1px solid #444}.ig{background:linear-gradient(45deg,#f9a03f,#e1306c,#833ab4)}.x{background:#000;border:1px solid #555}.rd{background:#ff4500}.more{background:#2a1a60}.ad{background:#be123c}
+.hidden{display:none!important}
+.empty{text-align:center;color:var(--m);padding:46px 10px}
+.empty b{display:block;font-size:20px;color:#d8ccff;margin-bottom:6px;animation:float 3s ease-in-out infinite}
+.result{display:grid;grid-template-columns:minmax(260px,1fr) 1.2fr;gap:20px}
+.player{position:relative;border-radius:10px;overflow:hidden;background:#000 center/cover;aspect-ratio:16/9;border:1px solid var(--line)}
+.player video{width:100%;height:100%;object-fit:contain;background:#000}
+.badge{position:absolute;top:10px;left:10px;border:1px solid #fff9;border-radius:6px;padding:1px 7px;font-weight:700;font-size:12px;background:#0008;z-index:2}
+.bigplay{position:absolute;inset:0;margin:auto;width:60px;height:60px;border-radius:50%;background:#000a;display:grid;place-items:center;font-size:22px;animation:pulse 2s infinite;z-index:2}
+.meta h3{font-size:18px;margin:6px 0}
+.meta .sub{color:var(--m);display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.q{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#0b0620}
+.q .row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.qb{flex:1;min-width:64px;padding:9px;border-radius:6px;background:#1a0f42;transition:.2s}
+.qb:hover{background:#2b1a66}.qb.on{background:linear-gradient(90deg,#8b5cf6,#7c3aed);box-shadow:0 0 14px #7c3aed99}
+.dlwrap{position:relative;display:flex;margin-top:14px}
+.dl{flex:1;height:54px;border-radius:8px 0 0 8px;background:linear-gradient(90deg,#9333ea,#7c3aed);font-size:17px;font-weight:600;position:relative;overflow:hidden;transition:.25s}
+.dl:hover{filter:brightness(1.15)}
+.dd{width:50px;border-radius:0 8px 8px 0;background:#6d4ae0}
+.menu{position:absolute;right:0;top:58px;z-index:20;background:#120a30;border:1px solid var(--line);border-radius:8px;padding:6px;min-width:210px;animation:up .2s both}
+.menu button{display:block;width:100%;text-align:left;padding:10px 12px;border-radius:6px;background:none}
+.menu button:hover{background:#2b1a66}
+.prog{margin-top:12px;height:10px;border-radius:6px;background:#1a0f42;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:repeating-linear-gradient(45deg,#8b5cf6 0 10px,#a855f7 10px 20px);background-size:28px 28px;animation:stripe .8s linear infinite;transition:width .3s}
+.pinfo{display:flex;justify-content:space-between;color:var(--m);font-size:12px;margin-top:6px}
+.err{color:var(--err);margin-top:10px}
+.info{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid #2a1a60}
+.info dl{display:grid;grid-template-columns:90px 1fr;gap:8px;color:#d8ccff}.info dt{color:var(--m)}
+.acts{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.acts .btn{height:40px;padding:0 16px}
+.side-item{display:flex;gap:12px;align-items:center;padding:9px 6px;border-radius:8px;transition:.25s}
+.side-item:hover{background:#1a0f42;transform:translateX(4px)}
+.side-item small{display:block;color:var(--m)}
+h4{font-size:16px;margin:4px 0 8px}
+.feat .ic{width:40px;height:40px;background:#25135c;font-size:18px}
+table{width:100%;border-collapse:collapse}td{padding:10px;border-bottom:1px solid #2a1a60}
+.hist a{color:#c4b5fd;cursor:pointer}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.sgrid div{padding:14px;border:1px solid var(--line);border-radius:10px;background:#0b0620;display:flex;gap:10px;align-items:center;transition:.25s}
+.sgrid div:hover{transform:translateY(-4px);box-shadow:0 8px 22px #7c3aed55}
+select{background:#150c3a;color:#fff;border:1px solid var(--line);border-radius:6px;padding:8px}
+footer{text-align:center;color:var(--m);font-size:12px;margin-top:auto;padding-top:8px}
+footer b{color:var(--p2)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes shine{0%{left:-60%}60%,100%{left:130%}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 #a855f799}70%,100%{box-shadow:0 0 0 22px #a855f700}}
+@keyframes stripe{to{background-position:28px 0}}
+@keyframes float{50%{transform:translateY(-6px)}}
+@keyframes flick{0%,92%,96%,100%{filter:drop-shadow(0 0 16px #7c3aed)}94%{filter:drop-shadow(0 0 34px #22d3ee) brightness(1.3)}}
+@media(max-width:1000px){.app{grid-template-columns:1fr}aside{flex-direction:row;overflow:auto;padding:8px}.brand,.side-art{display:none}.grid,.result{grid-template-columns:1fr}.title b{font-size:40px}.tag{display:none}.avatar{width:84px;height:84px}.input-row{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<div class="app">
+<aside>
+  <div class="brand"><span class="logo"><i></i></span><span>ERROR Video Downloader</span></div>
+  <button class="nav on" data-v="home">🏠 Home</button>
+  <button class="nav" data-v="sites">🔗 Supported Sites</button>
+  <button class="nav" data-v="history">🕘 History</button>
+  <button class="nav" data-v="settings">⚙️ Settings</button>
+  <button class="nav" data-v="about">ℹ️ About</button>
+  <div class="side-art">ERROR</div>
+</aside>
+<main>
+  <section class="banner">
+    <div class="avatar"><i></i></div>
+    <div class="title"><b>ERROR</b><span>SEISHIRO</span></div>
+    <div><h2 style="color:#c4b5fd;font-weight:600">Video Downloader</h2><p style="color:var(--m)">Fast · Simple · All Platforms</p><p style="letter-spacing:4px;margin-top:14px;color:#d8ccff">PASTE · PREVIEW · DOWNLOAD</p></div>
+    <div class="tag"><p class="quote">Think less,<br>See everything.”<br><i style="color:var(--m)">– Seishiro</i></p></div>
+  </section>
+
+  <!-- HOME -->
+  <div id="v-home" class="view grid">
+    <div class="col">
+      <div class="card">
+        <div class="input-row">
+          <label class="input">🔗<input id="url" placeholder="Paste your video link here..." autocomplete="off"></label>
+          <button class="btn pri" id="paste">📋 Paste Link</button>
+          <button class="btn" id="clear">✕ Clear</button>
+        </div>
+        <div class="sup"><span>Supported:</span>
+          <span class="chip"><span class="ic yt">▶</span>YouTube</span><span class="chip"><span class="ic fb">f</span>Facebook</span>
+          <span class="chip"><span class="ic tt">♪</span>TikTok</span><span class="chip"><span class="ic ig">◎</span>Instagram</span>
+          <span class="chip"><span class="ic x">𝕏</span>X</span><span class="chip"><span class="ic rd">r</span>Reddit</span>
+          <span class="chip"><span class="ic ad">18</span>Adult</span><span class="chip"><span class="ic more">+</span>1000+ more</span>
+        </div>
+      </div>
+      <div class="card" id="empty"><div class="empty"><b>Paste a link to begin</b>Video + Audio · up to 4K · any site</div></div>
+      <div class="card hidden" id="loading"><div class="empty"><b>Fetching video info…</b><div class="prog"><i style="width:100%"></i></div></div></div>
+      <div class="card hidden" id="result">
+        <div class="result">
+          <div class="player" id="player"><span class="badge" id="hd">HD</span><div class="bigplay" id="bigplay">▶</div></div>
+          <div class="meta">
+            <div id="siteName" style="color:#d8ccff"></div>
+            <h3 id="vtitle"></h3>
+            <div class="sub"><span id="views"></span><span id="dur"></span></div>
+            <div class="q"><div style="color:var(--m);font-size:12px">Quality Available:</div><div class="row" id="quals"></div></div>
+            <div class="dlwrap">
+              <button class="dl" id="dl">⬇ Download Video</button>
+              <button class="dd" id="ddb">⌄</button>
+              <div class="menu hidden" id="menu">
+                <button data-m="video" data-f="mp4">🎬 Video · MP4</button>
+                <button data-m="video" data-f="webm">🎬 Video · WEBM</button>
+                <button data-m="audio" data-f="mp3">🎵 Audio · MP3</button>
+                <button data-m="audio" data-f="m4a">🎵 Audio · M4A</button>
+                <button data-m="audio" data-f="opus">🎵 Audio · OPUS</button>
+              </div>
+            </div>
+            <div id="pwrap" class="hidden"><div class="prog"><i id="pbar"></i></div><div class="pinfo"><span id="ptxt">Starting…</span><span id="pspd"></span></div></div>
+            <div class="err hidden" id="errbox"></div>
+          </div>
+        </div>
+        <div class="info">
+          <dl><dt>Title</dt><dd id="i1"></dd><dt>Author</dt><dd id="i2"></dd><dt>Duration</dt><dd id="i3"></dd><dt>Size</dt><dd id="i4"></dd></dl>
+          <div class="acts">
+            <button class="btn" id="play">▶ Play</button><button class="btn" id="dl2">⬇ Download</button>
+            <button class="btn" id="copy">🔗 Copy Link</button><button class="btn" id="clear2" style="color:#fda4af">✕ Clear Link</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card"><h4>Supported Platforms</h4>
+        <div class="side-item"><span class="ic yt">▶</span><div>YouTube<small>Video, Shorts, Music</small></div></div>
+        <div class="side-item"><span class="ic fb">f</span><div>Facebook<small>Video, Reels</small></div></div>
+        <div class="side-item"><span class="ic tt">♪</span><div>TikTok<small>Video</small></div></div>
+        <div class="side-item"><span class="ic ig">◎</span><div>Instagram<small>Reels &amp; Video</small></div></div>
+        <div class="side-item"><span class="ic x">𝕏</span><div>Twitter / X<small>Video</small></div></div>
+        <div class="side-item"><span class="ic rd">r</span><div>Reddit<small>Video</small></div></div>
+        <div class="side-item"><span class="ic ad">18</span><div>Adult Sites<small>All major sites</small></div></div>
+        <div class="side-item"><span class="ic more">+</span><div>More Platforms<small>Vimeo, Dailymotion, etc.</small></div></div>
+      </div>
+      <div class="card feat">
+        <div class="side-item"><span class="ic">⚡</span><div>Fast Download<small>High speed &amp; stable</small></div></div>
+        <div class="side-item"><span class="ic">🎞</span><div>HD Quality<small>Up to 4K (if available)</small></div></div>
+        <div class="side-item"><span class="ic">📁</span><div>Multiple Format<small>MP4, WEBM, MP3, M4A…</small></div></div>
+        <div class="side-item"><span class="ic">🛡</span><div>Free to Use<small>No login required</small></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="v-sites" class="view card hidden"><h4>Supported Sites</h4><p style="color:var(--m);margin-bottom:14px">Powered by yt-dlp (kept auto-updated): 1000+ sites including adult sites.</p>
+    <div class="sgrid" id="sgrid"></div></div>
+  <div id="v-history" class="view card hidden"><h4>History</h4><table id="htable"></table><button class="btn" id="hclear" style="margin-top:12px">Clear history</button></div>
+  <div id="v-settings" class="view card hidden"><h4>Settings</h4>
+    <p style="margin:10px 0">Default quality <select id="sq"><option value="0">Best</option><option>2160</option><option>1440</option><option>1080</option><option>720</option><option>480</option><option>360</option></select></p>
+    <p>Default format <select id="sf"><option value="mp4">MP4</option><option value="webm">WEBM</option></select></p></div>
+  <div id="v-about" class="view card hidden"><h4>About</h4><p style="color:var(--m)">ERROR Video Downloader — paste, preview, download video or audio from almost any site. Download only content you have the right to save.</p></div>
+
+  <footer><b>ERROR</b> Video Downloader | Powered by ERROR SEISHIRO</footer>
+</main>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const LS={get:(k,d)=>{try{return JSON.parse(localStorage[k])}catch{return d}},set:(k,v)=>{try{localStorage[k]=JSON.stringify(v)}catch{}}};
+let info=null,height=0,fmt='mp4',mode='video',busy=false,cache={};
+
+/* nav */
+$$('.nav').forEach(b=>b.onclick=()=>{$$('.nav').forEach(x=>x.classList.toggle('on',x===b));$$('.view').forEach(v=>v.classList.add('hidden'));
+  $('#v-'+b.dataset.v).classList.remove('hidden');if(b.dataset.v==='history')renderHistory();});
+
+/* helpers */
+const fmtT=s=>{s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return(h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0')};
+const fmtN=n=>n>=1e9?(n/1e9).toFixed(1)+'B':n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':n;
+const fmtS=b=>b?(b>1e9?(b/1e9).toFixed(2)+' GB':(b/1e6).toFixed(1)+' MB'):'—';
+const show=(id,on=true)=>$(id).classList.toggle('hidden',!on);
+
+/* info */
+async function load(){
+  const u=$('#url').value.trim(); if(!u)return;
+  show('#empty',false);show('#result',false);show('#loading');resetProg();
+  try{
+    const r=await fetch('/api/info?url='+encodeURIComponent(u)); const j=await r.json();
+    if(!r.ok)throw new Error(j.error); info=j; cache={}; render();
+    const h=LS.get('hist',[]).filter(x=>x.url!==j.url); h.unshift({url:j.url,title:j.title,site:j.site,t:Date.now()}); LS.set('hist',h.slice(0,50));
+  }catch(e){show('#loading',false);show('#empty');$('#empty').innerHTML='<div class="empty"><b style="color:var(--err)">Could not load this link</b>'+e.message.replace(/</g,'&lt;')+'</div>';}
+}
+function render(){
+  show('#loading',false);show('#result');
+  const pl=$('#player'); pl.innerHTML='<span class="badge" id="hd"></span><div class="bigplay" id="bigplay">▶</div>'; pl.style.backgroundImage=info.thumbnail?`url(${info.thumbnail})`:'';
+  $('#bigplay').onclick=play;
+  const hs=info.heights; const dq=Number(LS.get('q',0)); height=hs.includes(dq)?dq:(hs[0]||0);
+  fmt=LS.get('f','mp4'); mode=info.hasVideo?'video':'audio'; if(!info.hasVideo)fmt='mp3';
+  $('#siteName').textContent=info.site+' Video'; $('#vtitle').textContent=info.title;
+  $('#views').textContent='👁 '+fmtN(info.views)+' views'; $('#dur').textContent='⏱ '+fmtT(info.duration);
+  $('#i1').textContent=info.title;$('#i2').textContent=info.uploader||'—';$('#i3').textContent=fmtT(info.duration);
+  const q=$('#quals'); q.innerHTML=''; const list=hs.length?hs:[0];
+  list.slice(0,6).forEach(h=>{const b=document.createElement('button');b.className='qb';b.textContent=h?h+'p':'Audio';b.onclick=()=>{height=h;mark();};b.dataset.h=h;q.appendChild(b)});
+  mark();
+}
+function mark(){$$('.qb').forEach(b=>b.classList.toggle('on',Number(b.dataset.h)===height));
+  $('#hd').textContent=height>=2160?'4K':height>=1080?'HD':height?height+'p':'AUDIO'; $('#i4').textContent=(height?height+'p: ':'')+'~ '+fmtS(info.sizes[height]);
+  $('#dl').textContent=mode==='audio'?'⬇ Download Audio':'⬇ Download Video';}
+
+/* download / play */
+function resetProg(){show('#pwrap',false);show('#errbox',false);$('#pbar').style.width='0'}
+function start(m,f,h){
+  return new Promise(async(res,rej)=>{
+    const key=[m,f,h].join('|'); if(cache[key])return res(cache[key]);
+    resetProg();show('#pwrap');$('#ptxt').textContent='Starting…';
+    try{
+      const r=await fetch('/api/jobs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:info.url,mode:m,fmt:f,height:h})});
+      const j=await r.json(); if(!r.ok)throw new Error(j.error);
+      const es=new EventSource('/api/jobs/'+j.id+'/events');
+      es.onmessage=ev=>{const d=JSON.parse(ev.data);
+        $('#pbar').style.width=d.progress+'%';$('#ptxt').textContent=d.status==='running'?Math.round(d.progress)+'% '+(d.eta&&d.eta!=='NA'?'· ETA '+d.eta:''):d.status==='done'?'Done ✔':'Failed';$('#pspd').textContent=d.speed||'';
+        if(d.status==='done'){es.close();cache[key]=j.id;res(j.id)}
+        if(d.status==='error'){es.close();rej(new Error(d.error))}};
+      es.onerror=()=>{es.close();};
+    }catch(e){rej(e)}
+  });
+}
+async function go(m,f,action){
+  if(busy||!info)return; busy=true;
+  try{const id=await start(m,f,height);
+    if(action==='play'){const pl=$('#player');pl.innerHTML='<video controls autoplay playsinline src="/api/jobs/'+id+'/file?inline=1"></video>'}
+    else{const a=document.createElement('a');a.href='/api/jobs/'+id+'/file';a.download='';document.body.appendChild(a);a.click();a.remove()}
+  }catch(e){show('#errbox');$('#errbox').textContent='⚠ '+e.message}
+  busy=false;
+}
+const play=()=>go('video','mp4','play');
+$('#play').onclick=play;
+$('#dl').onclick=()=>go(mode,fmt,'dl'); $('#dl2').onclick=$('#dl').onclick;
+$('#ddb').onclick=e=>{e.stopPropagation();$('#menu').classList.toggle('hidden')};
+document.addEventListener('click',()=>show('#menu',false));
+$$('#menu button').forEach(b=>b.onclick=()=>{mode=b.dataset.m;fmt=b.dataset.f;$('#dl').textContent=(mode==='audio'?'⬇ Download Audio ('+fmt.toUpperCase()+')':'⬇ Download Video ('+fmt.toUpperCase()+')');go(mode,fmt,'dl')});
+
+/* input */
+$('#paste').onclick=async()=>{try{$('#url').value=await navigator.clipboard.readText();load()}catch{$('#url').focus()}};
+$('#url').addEventListener('keydown',e=>e.key==='Enter'&&load());
+$('#url').addEventListener('paste',()=>setTimeout(load,50));
+const clr=()=>{$('#url').value='';info=null;show('#result',false);show('#loading',false);show('#empty');$('#empty').innerHTML='<div class="empty"><b>Paste a link to begin</b>Video + Audio · up to 4K · any site</div>'};
+$('#clear').onclick=clr;$('#clear2').onclick=clr;
+$('#copy').onclick=()=>{navigator.clipboard?.writeText(info.url);$('#copy').textContent='✔ Copied';setTimeout(()=>$('#copy').textContent='🔗 Copy Link',1200)};
+
+/* history / sites / settings */
+function renderHistory(){const h=LS.get('hist',[]);$('#htable').innerHTML=h.length?h.map((x,i)=>`<tr><td>${x.site||''}</td><td><a data-i="${i}">${x.title.replace(/</g,'&lt;')}</a></td><td style="color:var(--m)">${new Date(x.t).toLocaleString()}</td></tr>`).join(''):'<tr><td style="color:var(--m)">Nothing yet</td></tr>';
+  $$('#htable a').forEach(a=>a.onclick=()=>{$('#url').value=h[a.dataset.i].url;$$('.nav')[0].click();load()})}
+$('#hclear').onclick=()=>{LS.set('hist',[]);renderHistory()};
+$('#sgrid').innerHTML=[['YouTube','yt','▶'],['Facebook','fb','f'],['TikTok','tt','♪'],['Instagram','ig','◎'],['Twitter / X','x','𝕏'],['Reddit','rd','r'],['Vimeo','more','V'],['Dailymotion','more','d'],['Twitch','more','T'],['SoundCloud','more','☁'],['Adult sites (18+)','ad','18'],['1000+ more','more','+']].map(s=>`<div><span class="ic ${s[1]}">${s[2]}</span>${s[0]}</div>`).join('');
+$('#sq').value=LS.get('q',0);$('#sf').value=LS.get('f','mp4');
+$('#sq').onchange=e=>LS.set('q',Number(e.target.value));$('#sf').onchange=e=>LS.set('f',e.target.value);
+
+/* particles */
+const cv=$('#fx'),cx=cv.getContext('2d');let W,H,P=[];
+function rs(){W=cv.width=innerWidth;H=cv.height=innerHeight}rs();addEventListener('resize',rs);
+for(let i=0;i<70;i++)P.push({x:Math.random()*2000,y:Math.random()*1200,r:Math.random()*2+.5,s:Math.random()*.6+.2,a:Math.random()});
+(function f(){cx.clearRect(0,0,W,H);for(const p of P){p.y-=p.s;p.x+=Math.sin(p.y/60)*.3;if(p.y<-5){p.y=H+5;p.x=Math.random()*W}
+  cx.beginPath();cx.fillStyle=`rgba(168,85,247,${.25+.5*Math.abs(Math.sin(p.a+=.02))})`;cx.shadowBlur=12;cx.shadowColor='#a855f7';cx.arc(p.x,p.y,p.r,0,7);cx.fill()}requestAnimationFrame(f)})();
+</script>
+</body>
+</html>
