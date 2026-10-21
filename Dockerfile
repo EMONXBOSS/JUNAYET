@@ -1,18 +1,18 @@
-FROM node:24-slim
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-      python3 ffmpeg curl ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# Always pull the newest yt-dlp at build time (server also self-updates every 6h)
-RUN curl -fsSL https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
-      -o /usr/local/bin/yt-dlp && chmod a+rx /usr/local/bin/yt-dlp
-
+FROM node:20-bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-venv ffmpeg ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+# yt-dlp in its own venv (owned by the app user so it can self-update at runtime).
+# [default] pulls in the JS-challenge solver YouTube needs; Node (already in this image) is the JS runtime.
+RUN python3 -m venv /opt/venv \
+ && /opt/venv/bin/pip install --no-cache-dir -U "yt-dlp[default]" \
+ && chown -R node:node /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 WORKDIR /app
-COPY package.json ./
+COPY package*.json ./
 RUN npm install --omit=dev
 COPY . .
-
-ENV NODE_ENV=production PORT=3000
+RUN mkdir -p /app/downloads && chown -R node:node /app
+USER node
+ENV NODE_ENV=production
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["npm","start"]
